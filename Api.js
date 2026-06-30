@@ -3,9 +3,10 @@
 // ============================================================
 
 const API = {
-  // Cache data lokal supaya tidak sering fetch
   _cache: {},
-
+  _cacheTime: {},
+  CACHE_DURATION: 30000, // Cache 30 detik
+  
   // ── GET semua data dari satu sheet ──────────────────────────
   async getAll(sheet) {
     try {
