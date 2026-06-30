@@ -7,20 +7,28 @@ const API = {
   _cacheTime: {},
   CACHE_DURATION: 30000, // Cache 30 detik
   
-  // ── GET semua data dari satu sheet ──────────────────────────
-  async getAll(sheet) {
+    async getAll(sheet) {
+    // Cek cache dulu
+    const now = Date.now();
+    if (this._cache[sheet] && (now - this._cacheTime[sheet]) < this.CACHE_DURATION) {
+      return this._cache[sheet]; // Pakai cache, gak perlu fetch ulang
+    }
+
     try {
-      const url = `${CONFIG.SCRIPT_URL}?action=getAll&sheet=${sheet}&_=${Date.now()}`;
+      const url = CONFIG.SCRIPT_URL + "?action=getAll&sheet=" + sheet + "&_=" + now;
       const res = await fetch(url);
       const json = await res.json();
+      
       if (json.status === "success") {
         this._cache[sheet] = json.data;
+        this._cacheTime[sheet] = now;
         return json.data;
       }
-      throw new Error(json.message || "Gagal mengambil data");
+      
+      alert("Error ambil data: " + json.message);
+      return this._cache[sheet] || [];
     } catch (err) {
-      console.error("[API.getAll]", err);
-      UI.showToast("Gagal terhubung ke Google Sheets", "error");
+      alert("Gagal connect ke server! Cek koneksi internet");
       return this._cache[sheet] || [];
     }
   },
